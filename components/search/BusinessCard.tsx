@@ -8,6 +8,7 @@ import { Star, Phone, Instagram, Globe, MapPin, Plus, Check } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { calcScore, scoreTier, TIER_STYLES } from '@/lib/scoring'
 
 interface BusinessCardProps {
   business: BusinessResult
@@ -21,6 +22,9 @@ export default function BusinessCard({
   onAdded,
 }: BusinessCardProps) {
   const [adding, setAdding] = useState(false)
+
+  const score = calcScore(business)
+  const tier = scoreTier(score)
 
   async function handleAdd() {
     setAdding(true)
@@ -67,9 +71,14 @@ export default function BusinessCard({
           <h3 className="font-mono font-black text-white text-lg leading-tight uppercase tracking-tighter group-hover:underline decoration-2 underline-offset-4">
             {business.business_name}
           </h3>
-          <span className="text-[9px] font-mono font-bold text-zinc-600 tracking-widest shrink-0">REG::{business.google_place_id.slice(-8).toUpperCase()}</span>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span className="text-[9px] font-mono font-bold text-zinc-600 tracking-widest">REG::{business.google_place_id.slice(-8).toUpperCase()}</span>
+            <span className={cn('text-[9px] font-mono font-black border px-1.5 py-0.5 tracking-widest', TIER_STYLES[tier])}>
+              {tier} [{score}]
+            </span>
+          </div>
         </div>
-        
+
         <div className="flex items-center gap-3 mt-1">
           {business.has_website ? (
             <div className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-widest">
@@ -130,8 +139,8 @@ export default function BusinessCard({
         onClick={handleAdd}
         className={cn(
           "w-full h-12 font-mono font-black uppercase tracking-widest transition-all rounded-none",
-          isAdded 
-            ? "bg-transparent border border-white/20 text-zinc-500 cursor-not-allowed" 
+          isAdded
+            ? "bg-transparent border border-white/20 text-zinc-500 cursor-not-allowed"
             : "bg-white text-black border border-white hover:bg-transparent hover:text-white"
         )}
       >

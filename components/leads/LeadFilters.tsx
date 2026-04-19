@@ -16,6 +16,7 @@ const STATUSES: LeadStatus[] = [
 
 const SORT_OPTIONS = [
   { value: 'created_at', label: 'DATE_ADDED' },
+  { value: 'score', label: 'LEAD_SCORE' },
   { value: 'business_name', label: 'BUSINESS_NAME' },
   { value: 'status', label: 'STATUS_LEVEL' },
   { value: 'district', label: 'REGION' },

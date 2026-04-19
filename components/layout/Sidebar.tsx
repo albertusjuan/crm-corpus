@@ -11,6 +11,7 @@ const navItems = [
   { href: '/search', label: 'Find Leads', id: '01' },
   { href: '/leads', label: 'All Leads', id: '02' },
   { href: '/pipeline', label: 'Pipeline', id: '03' },
+  { href: '/analytics', label: 'Analytics', id: '04' },
 ]
 
 export default function Sidebar() {

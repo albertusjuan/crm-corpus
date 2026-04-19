@@ -1,14 +1,16 @@
 'use client'
 
 interface MassScanPanelProps {
-  progress: { current: number; total: number; district: string; found: number } | null
+  progress: { current: number; total: number; district: string; category: string; found: number } | null
+  categories: string[]
   onStart: () => void
   onAbort: () => void
 }
 
-export default function MassScanPanel({ progress, onStart, onAbort }: MassScanPanelProps) {
+export default function MassScanPanel({ progress, categories, onStart, onAbort }: MassScanPanelProps) {
   const isRunning = progress !== null
   const percentage = progress ? Math.round((progress.current / progress.total) * 100) : 0
+  const districts = 35
 
   return (
     <div className="bg-black border border-white/20 p-10 mb-16">
@@ -18,25 +20,31 @@ export default function MassScanPanel({ progress, onStart, onAbort }: MassScanPa
           Mass_Scan
         </h2>
         <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">
-          Sweeps all {' '}
-          <span className="text-white">35 Hong Kong districts</span>
-          {' '} — surfaces every local business without a website
+          Sweeps all{' '}
+          <span className="text-white">{districts} districts</span>
+          {' '}across{' '}
+          <span className="text-white">{categories.length} categories</span>
+          {' '}— surfaces every local business without a website
         </p>
       </div>
 
       {isRunning ? (
         <div className="space-y-8">
-          <div className="grid grid-cols-3 gap-8 border border-white/10 p-6">
+          <div className="grid grid-cols-4 gap-6 border border-white/10 p-6">
             <div className="space-y-1">
               <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Status</p>
               <p className="text-xs font-mono font-black text-white uppercase tracking-widest">Scanning</p>
             </div>
             <div className="space-y-1">
-              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Current_District</p>
+              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">District</p>
               <p className="text-xs font-mono font-black text-white uppercase tracking-widest">{progress.district}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">No_Website_Found</p>
+              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Category</p>
+              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">{progress.category}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">No_Website</p>
               <p className="text-xs font-mono font-black text-white uppercase tracking-widest">{progress.found}</p>
             </div>
           </div>
@@ -44,7 +52,7 @@ export default function MassScanPanel({ progress, onStart, onAbort }: MassScanPa
           <div className="space-y-2">
             <div className="flex justify-between text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
               <span>Progress</span>
-              <span>{progress.current} / {progress.total} districts</span>
+              <span>{progress.current} / {progress.total} queries — {percentage}%</span>
             </div>
             <div className="w-full h-[2px] bg-zinc-900">
               <div
@@ -63,19 +71,31 @@ export default function MassScanPanel({ progress, onStart, onAbort }: MassScanPa
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="grid grid-cols-3 gap-8 border border-white/10 p-6">
+          <div className="grid grid-cols-4 gap-6 border border-white/10 p-6">
             <div className="space-y-1">
-              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Coverage</p>
-              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">35 Districts</p>
+              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Districts</p>
+              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">{districts}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Categories</p>
+              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">{categories.length}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Total_Queries</p>
+              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">{districts * categories.length}</p>
             </div>
             <div className="space-y-1">
               <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Filter</p>
-              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">No Website Only</p>
+              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">No Website</p>
             </div>
-            <div className="space-y-1">
-              <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Mode</p>
-              <p className="text-xs font-mono font-black text-white uppercase tracking-widest">Any Business Type</p>
-            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {categories.map((c) => (
+              <span key={c} className="px-2 py-1 border border-white/10 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+                {c}
+              </span>
+            ))}
           </div>
 
           <button

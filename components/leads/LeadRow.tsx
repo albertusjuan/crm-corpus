@@ -1,6 +1,6 @@
 'use client'
 
-import { Lead, LeadStatus, STATUS_LABELS, STATUS_COLORS, STATUS_EMOJI } from '@/types'
+import { Lead, LeadStatus, STATUS_LABELS } from '@/types'
 import { createClient } from '@/lib/supabase/client'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -20,16 +20,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import {
-  Star,
-  MapPin,
-  Instagram,
-  MoreHorizontal,
-  Pencil,
-  ExternalLink,
-  Trash2,
-} from 'lucide-react'
+import { MapPin, Instagram, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { calcScore, scoreTier, TIER_STYLES } from '@/lib/scoring'
 
 const STATUSES: LeadStatus[] = [
   'new', 'contacted', 'responded', 'meeting', 'won', 'lost', 'not_interested',
@@ -42,6 +35,8 @@ interface LeadRowProps {
 
 export default function LeadRow({ lead, onOpenDetail }: LeadRowProps) {
   const queryClient = useQueryClient()
+  const score = calcScore(lead)
+  const tier = scoreTier(score)
 
   async function updateStatus(newStatus: LeadStatus) {
     const supabase = createClient()
@@ -102,7 +97,9 @@ export default function LeadRow({ lead, onOpenDetail }: LeadRowProps) {
         )}
       </TableCell>
 
-      <TableCell className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">{lead.district ?? '—'}</TableCell>
+      <TableCell className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
+        {lead.district ?? '—'}
+      </TableCell>
 
       <TableCell>
         <div className="space-y-1 font-mono">
@@ -124,6 +121,12 @@ export default function LeadRow({ lead, onOpenDetail }: LeadRowProps) {
         ) : (
           <span className="text-xs text-zinc-800 font-mono">—</span>
         )}
+      </TableCell>
+
+      <TableCell>
+        <span className={cn('text-[9px] font-mono font-black border px-1.5 py-0.5 tracking-widest', TIER_STYLES[tier])}>
+          {tier} [{score}]
+        </span>
       </TableCell>
 
       <TableCell>

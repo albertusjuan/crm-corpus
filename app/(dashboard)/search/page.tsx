@@ -9,6 +9,8 @@ import SearchResults from '@/components/search/SearchResults'
 import MassScanPanel from '@/components/search/MassScanPanel'
 import { toast } from 'sonner'
 
+const MASS_SCAN_CATEGORIES = ['shop', 'restaurant', 'salon', 'clinic', 'store']
+
 async function fetchExistingPlaceIds(): Promise<Set<string>> {
   const supabase = createClient()
   const { data } = await supabase.from('leads').select('google_place_id')
@@ -34,6 +36,7 @@ export default function SearchPage() {
     current: number
     total: number
     district: string
+    category: string
     found: number
   } | null>(null)
   const abortRef = useRef(false)
@@ -68,30 +71,41 @@ export default function SearchPage() {
 
     const accumulated = new Map<string, BusinessResult>()
     const districts = [...HK_DISTRICTS]
+    const total = districts.length * MASS_SCAN_CATEGORIES.length
+    let opIdx = 0
 
-    for (let i = 0; i < districts.length; i++) {
-      if (abortRef.current) break
+    for (const district of districts) {
+      for (const category of MASS_SCAN_CATEGORIES) {
+        if (abortRef.current) break
+        opIdx++
 
-      const noWebsiteCount = Array.from(accumulated.values()).filter((r) => !r.has_website).length
-      setMassProgress({ current: i + 1, total: districts.length, district: districts[i], found: noWebsiteCount })
-
-      try {
-        const res = await fetch('/api/scrape', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ businessType: 'shop', district: districts[i] }),
+        setMassProgress({
+          current: opIdx,
+          total,
+          district,
+          category,
+          found: Array.from(accumulated.values()).filter((r) => !r.has_website).length,
         })
-        if (res.ok) {
-          const json = await res.json()
-          for (const biz of json.results as BusinessResult[]) {
-            accumulated.set(biz.google_place_id, biz)
+
+        try {
+          const res = await fetch('/api/scrape', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ businessType: category, district }),
+          })
+          if (res.ok) {
+            const json = await res.json()
+            for (const biz of json.results as BusinessResult[]) {
+              accumulated.set(biz.google_place_id, biz)
+            }
+            setResults(Array.from(accumulated.values()))
+            setHasSearched(true)
           }
-          setResults(Array.from(accumulated.values()))
-          setHasSearched(true)
+        } catch {
+          // skip failed request, continue scan
         }
-      } catch {
-        // skip failed district, continue
       }
+      if (abortRef.current) break
     }
 
     const finalNoWebsite = Array.from(accumulated.values()).filter((r) => !r.has_website).length
@@ -113,8 +127,6 @@ export default function SearchPage() {
     setResults([])
     setHasSearched(false)
   }
-
-  const isLoading = isPending || massProgress !== null
 
   return (
     <div className="space-y-12">
@@ -158,6 +170,7 @@ export default function SearchPage() {
       ) : (
         <MassScanPanel
           progress={massProgress}
+          categories={MASS_SCAN_CATEGORIES}
           onStart={handleMassScan}
           onAbort={handleAbort}
         />

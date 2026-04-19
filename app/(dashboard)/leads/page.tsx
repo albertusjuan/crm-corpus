@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Lead } from '@/types'
 import LeadFilters, { Filters } from '@/components/leads/LeadFilters'
 import LeadsTable from '@/components/leads/LeadsTable'
+import { calcScore } from '@/lib/scoring'
 import LeadDetailModal from '@/components/leads/LeadDetailModal'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -54,6 +55,9 @@ export default function LeadsPage() {
       }
       if (filters.sortBy === 'district') {
         return (a.district ?? '').localeCompare(b.district ?? '')
+      }
+      if (filters.sortBy === 'score') {
+        return calcScore(b) - calcScore(a)
       }
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })

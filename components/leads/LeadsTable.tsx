@@ -38,6 +38,7 @@ export default function LeadsTable({ leads, onOpenDetail }: LeadsTableProps) {
             <TableHead>REGION</TableHead>
             <TableHead>COMM_CHANNEL</TableHead>
             <TableHead>TRUST_INDEX</TableHead>
+            <TableHead>SCORE</TableHead>
             <TableHead>PLATFORM</TableHead>
             <TableHead>STATUS</TableHead>
             <TableHead>TIMESTAMP</TableHead>
