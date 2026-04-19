@@ -51,6 +51,7 @@ CREATE TABLE leads (
   updated_at          TIMESTAMPTZ DEFAULT NOW(),
 
   -- Business info
+  google_place_id     TEXT NOT NULL,
   business_name       TEXT NOT NULL,
   business_type       TEXT,
   district            TEXT,
@@ -80,11 +81,14 @@ CREATE TABLE leads (
 
   -- Source tracking
   source              TEXT DEFAULT 'outscraper',
-  raw_data            JSONB
+  raw_data            JSONB,
+
+  CONSTRAINT leads_google_place_id_key UNIQUE (google_place_id)
 );
 
 -- INDEX for fast filtering
 CREATE INDEX idx_leads_status ON leads(status);
+CREATE INDEX idx_leads_google_place_id ON leads(google_place_id);
 CREATE INDEX idx_leads_district ON leads(district);
 CREATE INDEX idx_leads_business_type ON leads(business_type);
 CREATE INDEX idx_leads_has_website ON leads(has_website);
@@ -191,10 +195,10 @@ For each result, show a `BusinessCard.tsx` with:
 - 📸 Instagram handle (if found) — shown as `@handle` in purple
 - 🌐 Website status — show green "Has Website" badge if they have one, red "No Website" badge if not
 - Phone number
-- **"Add to Leads" button** — disabled and shows "Already Added" if this business is already in the `leads` table (check by `business_name + district` or `google_place_id`)
-- Clicking "Add to Leads" inserts into Supabase `leads` table with status `'new'`
+- **"Add to Leads" button** — disabled and shows "Already Added" if this business is already in the `leads` table (check by `google_place_id`)
+- Clicking "Add to Leads" writes to Supabase using `upsert(..., { onConflict: 'google_place_id' })` so duplicate leads are never created
 
-**Important filtering logic**: By default, automatically filter OUT results that have a real website (i.e. `has_website = true`). Add a toggle "Show businesses with websites too" so the user can see all results if they want. This means the default view only shows no-website businesses.
+**Important filtering logic**: By default, automatically filter OUT results that have a real website (i.e. `has_website = true`). Add a toggle "Show businesses with websites too" so the user can see all results if they want. This means the default view only shows no-website businesses. Deduplication must always use `google_place_id`, not `business_name + district`.
 
 **Loading state**: Show skeleton cards while fetching.
 
@@ -368,6 +372,8 @@ export interface Lead {
   id: string
   created_at: string
   updated_at: string
+  google_place_id: string
+  google_place_id: string
   business_name: string
   business_type: string | null
   district: string | null
@@ -545,6 +551,7 @@ export async function scrapeGoogleMaps(businessType: string, district: string) {
     const hasRealWebsite = !!websiteUrl && !SOCIAL_DOMAINS.some(d => websiteUrl.includes(d))
 
     return {
+      google_place_id: (r.place_id as string) ?? (r.cid as string) ?? (r.google_id as string) ?? '',
       business_name: r.name as string,
       business_type: businessType,
       district,
@@ -628,6 +635,7 @@ OUTSCRAPER_API_KEY=your-outscraper-api-key
 7. Copy `.env.local` with your real keys
 8. Install all packages listed above
 9. Build in this order: types → lib/supabase → lib/outscraper → middleware → login page → layout → search page → leads page → pipeline page
+10. When saving leads, always use `upsert` with `onConflict: 'google_place_id'` to prevent duplicate businesses from being created
 
 ---
 
