@@ -124,9 +124,12 @@ export default function LeadRow({ lead, onOpenDetail }: LeadRowProps) {
       </TableCell>
 
       <TableCell>
-        <span className={cn('text-[9px] font-mono font-black border px-1.5 py-0.5 tracking-widest', TIER_STYLES[tier])}>
-          {tier} [{score}]
-        </span>
+        <div className="flex flex-col gap-0.5">
+          <span className={cn('text-[9px] font-mono font-black border px-1.5 py-0.5 tracking-widest w-fit', TIER_STYLES[tier])}>
+            {tier}
+          </span>
+          <span className="text-[9px] font-mono text-zinc-500 tracking-widest">{score}/100</span>
+        </div>
       </TableCell>
 
       <TableCell>
