@@ -15,9 +15,10 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'WebLeads HK',
+  title: 'CorpusDB',
   description: 'Find and track local Hong Kong businesses without websites',
 }
+
 
 export default function RootLayout({
   children,

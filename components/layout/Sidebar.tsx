@@ -34,7 +34,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-background flex flex-col border-r border-white/20">
-      <div className="p-10 border-b border-white/20">
+      <div className="px-10 h-[72px] flex items-center border-b border-white/20">
         <div className="flex flex-col gap-1">
           <span className="text-white font-black text-2xl tracking-tighter uppercase font-mono">WebLeads</span>
           <span className="text-[10px] text-zinc-500 font-mono tracking-[0.3em] uppercase">Hong Kong Unit</span>
